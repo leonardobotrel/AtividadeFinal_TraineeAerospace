@@ -1,1 +1,13 @@
-...
+Enviar uma mensagem-Nivel 1
+
+Utilizar medições de algum outro componente-Nivel 2
+
+Salvar uma imagem codificada-Nivel 3
+
+Enviar uma imagem codificada-Nivel 4
+
+Criar um sistema de segurança-Nivel 5
+
+Criar um interface para comunicação-Nivel 6
+
+Criatividade-Nivel 7
