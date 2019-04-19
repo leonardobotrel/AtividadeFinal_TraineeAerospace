@@ -10,9 +10,7 @@
 String msg = "teste";
 int x = 10;
 int y = 5;
-bool escolha = false;
 float area;
-int frenquencia;
  
 //Create software serial object to communicate with SIM800
 SoftwareSerial serialSIM800(SIM800_TX_PIN,SIM800_RX_PIN);
@@ -24,7 +22,7 @@ void setup() {
   Serial.begin(9600);
   while(!Serial);
    
-  //Being serial communication witj Arduino and SIM800
+  //Being serial communication with Arduino and SIM800
   serialSIM800.begin(9600);
   delay(1000);
    
@@ -100,13 +98,43 @@ void loop() {
   else
   {
     Serial.println("authenticated.");
-  }
-  
-  
-  if (escolha == true)
-     area = satelite.areaRetangulo(x, y);
-  else
-     area = satelite.areaTriangulo(x, y);
 
-  serialSIM800.write(area);
+    /*Interface for communication, allows the user to choose what information they want to receive 
+    and the frequency of reception*/
+    //Use the readSerial() function to get the bytes from the serial monitor to choose the area.
+    char escolha[2];
+    Serial.println("Enter R to receive the rectangle area or T to receive the triangle area: ");
+    readSerial(escolha);
+    Serial.println(escolha);
+
+    //Select the area.
+    if(escolha[0] == 'R')
+      area = satelite.rectangleArea(x, y);
+    else if(escolha[0] == 'T')
+      area = satelite.triangleArea(x, y);
+    else
+       Serial.println("Invalid command");
+
+    //Use the readSerial() function to get the bytes from the serial monitor to choose the frequency.
+    //read the frequence.
+    char frequenciaAux[20];
+    Serial.println("Enter the frequency of reception in ms: ");
+    readSerial(frequenciaAux);
+
+    //Convert char frequenciaAux to int frequencia
+    int frequencia = atoi(frequenciaAux);
+
+    //Sends the chosen message with the desired frequency
+    char control = 'a';
+    while (control != 'e') {
+      Serial.println("enter 'e' to exit.");
+      serialSIM800.write(area);//Send the message
+      delay(frequencia);
+
+      if (Serial.available())
+      {
+        control = Serial.read(); 
+      }
+    }
+  }
 }
