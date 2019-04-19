@@ -13,12 +13,12 @@ Satelite::Satelite()
 }*/
 
 //Calc. the rectangle area and return
-float Satelite::areaRetangulo(int x, int y) {
+float Satelite::rectangleArea(int x, int y) {
     return x * y;
 }
 
 //Calc. the triangle area and return
-float Satelite::areaTriangulo(int x, int y) {
+float Satelite::triangleArea(int x, int y) {
     return (x * y)/2;
 }
 
