@@ -13,8 +13,8 @@ class Satelite
     public:
     Satelite();
     //void imprimirMensagem();
-    float areaRetangulo(int x, int y);
-    float areaTriangulo(int x, int y);
+    float rectangleArea(int x, int y);
+    float triangleArea(int x, int y);
     int authenticate(char login[], char password[]);
     //int escolheArea();
 
