@@ -1,12 +1,14 @@
 Enviar uma mensagem-Nivel 1
 
-Utilizar medições de algum outro componente-Nivel 2
+Utilizar medições de algum outro componente-Nivel 2 OK
+  Para esse nível foram criado duas funções na biblioteca, triangleArea(int x, int y) e rectangleArea(int x, int y), que      calculam e retornam respectivamente a área de um triangulo e a área de um retangulo conforme os parametros passados. No código do arduino são passados paremetros para essas funções e seus retornos são salvos para serem enviados nas mensagens. 
 
 Salvar uma imagem codificada-Nivel 3
 
 Enviar uma imagem codificada-Nivel 4
 
-Criar um sistema de segurança-Nivel 5
+Criar um sistema de segurança-Nivel 5 OK
+  No processo de segurança foi criado uma função no código do arduino, readSerial(char result[]), que lê a entrada do monitor serial para que se possa ler o login e a senha do usuário. Após essa leitura, o login e senha são passados para a função da biblioteca authenticate(login, password), que verifica se ambos estão corretos, se sim permite o envio das mensagens, se não avisa que o login ou a senha são invalidos.
 
 Criar um interface para comunicação-Nivel 6
 
