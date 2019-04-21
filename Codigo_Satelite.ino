@@ -1,11 +1,17 @@
 #include <Satelite.h>
+//#include <Base64.h>
+#include <JPEGDecoder.h>
 #include <SoftwareSerial.h>
+#include <SPI.h>
+#include <SD.h>
  
 //SIM800 TX is connected to Arduino D8
 #define SIM800_TX_PIN 8
  
 //SIM800 RX is connected to Arduino D7
 #define SIM800_RX_PIN 7
+
+File jpgFile;
 
 String msg = "teste";
 int x = 10;
@@ -46,6 +52,125 @@ void setup() {
   delay(1000);
      
   Serial.println("SMS Sent!");
+
+  //Begin SD card setup
+  Serial.print("Initializing SD card...");
+
+  if (!SD.begin(4)) {
+    Serial.println("initialization failed!");
+  }
+  else {
+  Serial.println("initialization done.");
+
+    // open the file.
+    jpgFile = SD.open("test.jpeg");
+
+    // if the file opened okay, start encode process:
+    if (jpgFile) {
+      Serial.println("Image OK!");
+
+      // Decode the JPEG file
+      JpegDec.decodeSdFile(jpgFile);
+
+      // Create a buffer for the packet
+      char dataBuff[240];
+
+      // Fill the buffer with zeros
+      initBuff(dataBuff);
+
+      // Create a header packet with info about the image
+      String header = "$ITHDR,";
+      header += JpegDec.width;
+      header += ",";
+      header += JpegDec.height;
+      header += ",";
+      header += JpegDec.MCUSPerRow;
+      header += ",";
+      header += JpegDec.MCUSPerCol;
+      header += ",";
+      header += jpgFile.name();
+      header += ",";
+      header.toCharArray(dataBuff, 240);
+
+      // Send the header packet
+      for(int j=0; j<240; j++) {
+        Serial.write(dataBuff[j]);
+      }
+
+      // Pointer to the current pixel
+      uint16_t *pImg;
+
+      // Color of the current pixel
+      uint16_t color;
+
+      // Create a data packet with the actual pixel colors
+      strcpy(dataBuff, "$ITDAT");
+      uint8_t i = 6;
+
+      // Repeat for all MCUs(Minimum Coded Units) in the image
+      while(JpegDec.read()) {
+        // Save pointer the current pixel
+        pImg = JpegDec.pImage;
+
+        // Get the coordinates of the MCU(Minimum Coded Units) we are currently processing
+        int mcuXCoord = JpegDec.MCUx;
+        int mcuYCoord = JpegDec.MCUy;
+
+        // Get the number of pixels in the current MCU(Minimum Coded Units)
+        uint32_t mcuPixels = JpegDec.MCUWidth * JpegDec.MCUHeight;
+
+        // Repeat for all pixels in the current MCU(Minimum Coded Units)
+        while(mcuPixels--) {
+          // Read the color of the pixel as 16-bit integer
+          color = *pImg++;
+        
+          // Split it into two 8-bit integers
+          dataBuff[i] = color >> 8;
+          dataBuff[i+1] = color;
+          i += 2;
+
+          // If the packet is full, send it
+          if(i == 240) {
+            for(int j=0; j<240; j++) {
+              Serial.write(dataBuff[j]);
+            }
+            i = 6;
+          }
+
+          // If we reach the end of the image, send a packet
+          if((mcuXCoord == JpegDec.MCUSPerRow - 1) && 
+            (mcuYCoord == JpegDec.MCUSPerCol - 1) && 
+            (mcuPixels == 1)) {
+          
+            // Send the pixel values
+            for(int j=0; j<i; j++) {
+              Serial.write(dataBuff[j]);
+            }
+          
+            // Fill the rest of the packet with zeros
+            for(int k=i; k<240; k++) {
+              Serial.write(0);
+            }
+          }
+        }
+      }
+      
+    } else {
+      // if the file didn't open, print an error:
+      Serial.println("error opening test.jpeg");
+    }
+    
+    jpgFile.close();
+     
+  }
+  
+}
+
+// Function to fill the packet buffer with zeros
+void initBuff(char* buff) {
+  for(int i = 0; i < 240; i++) {
+    buff[i] = 0;
+  }
 }
 
 /*Handle serial input from the serial monitor. While there is serial information available, 
